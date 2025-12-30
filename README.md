@@ -29,7 +29,30 @@ See the [Architectural Blueprint](./AURA_BLUEPRINT.md) for detailed technical sp
 
 ## Getting Started
 
-*(Instructions for building the Kernel and Compositor will be added in v0.2.0)*
+### Prerequisites
+
+*   **Rust Toolchain**: Stable channel (1.75+ recommended). [Install Rust](https://rustup.rs/)
+*   **Vulkan SDK**: Required for the Prism compositor. [Download SDK](https://vulkan.lunarg.com/)
+*   **C++ Compiler**: MSVC (Windows) or Clang/GCC (Linux) for native interop.
+
+### Installation
+
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/Aniket911cpu/AuraOS.git
+    cd AuraOS
+    ```
+
+2.  **Build the Kernel (Core)**
+    ```bash
+    cd core
+    cargo build --release
+    ```
+
+3.  **Run the Window Manager Prototype**
+    ```bash
+    cargo run --bin aura_os_core
+    ```
 
 ## License
 
