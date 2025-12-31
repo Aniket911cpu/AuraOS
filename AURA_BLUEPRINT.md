@@ -56,3 +56,24 @@ Manages the `Window` structs, handles input routing, and steps the physics simul
 
 ### 4.2 Compositor (`Prism`)
 Vulkan-based renderer that consumes `Window` states and renders the Liquid Glass shader passes.
+
+## 5. Core UI Screens
+
+### 5.1 The Prism Installer (OOBE)
+The Out-of-Box Experience.
+- **Window Type**: `Installer` (Fullscreen, Undecorated).
+- **Visuals**: High refractive index (1.8+), heavy blur, singular focus.
+- **Behavior**: Guides user through disk formatting and user creation. Upon completion, physics "shatters" or "dissolves" this window to reveal the Desktop.
+
+### 5.2 The Ethereal Desktop (Homescreen)
+- **Window Type**: `DesktopSurface` (Elevation 0.0).
+- **Content**: Empty by default. No icons.
+- **Behavior**: Acts as the "Floor" for all other windows.
+- **Components**:
+    - **Context Orb**: Floats at Elevation 1.0 (Resting) or 5.0 (Active).
+
+### 5.3 Control Center
+- **Window Type**: `Modal` (Floating Panel).
+- **Position**: Top-Right (typically).
+- **Metrics**: volume, brightness, network, battery.
+- **Interaction**: Drag sliders (physics-based resistance).

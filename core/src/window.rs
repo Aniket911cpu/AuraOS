@@ -20,12 +20,23 @@ pub struct MaterialProperties {
     pub roughness: f32,
 }
 
+/// Defines the semantic role of the window.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum WindowType {
+    Standard,        // Normal application window
+    Installer,       // Fullscreen, high focus OOBE
+    DesktopSurface,  // The background "floor"
+    ContextOrb,      // The floating cognitive interface
+    Modal,           // Control centers, dialogs
+}
+
 /// The fundamental UI unit in Aura OS.
 /// Not just a rect, but a physical object in 3D space.
 #[derive(Debug, Clone)]
 pub struct Window {
     pub id: u64,
     pub title: String,
+    pub window_type: WindowType,
     
     // Spatial State (Physics Driven)
     pub position_anim: AnimationState,
@@ -44,23 +55,40 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new(id: u64, title: String) -> Self {
+    pub fn new(id: u64, title: String, w_type: WindowType) -> Self {
         // Default start at 0,0,0
-        let start_pos = Vector3::new(0.0, 0.0, 0.0);
-        
-        // Z-Elevation is handled separately because it's a scalar often intertwined with blur
-        // We use a Vector3 for uniformity in AnimationState but really only care about X (value)
-        let start_elev = Vector3::new(1.0, 0.0, 0.0);
+        let mut start_pos = Vector3::new(0.0, 0.0, 0.0);
+        let mut start_elev = Vector3::new(1.0, 0.0, 0.0);
+        let mut dimensions = Vector3::new(800.0, 600.0, 0.05);
+
+        // Customize based on type
+        match w_type {
+            WindowType::Installer => {
+                dimensions = Vector3::new(1920.0, 1080.0, 0.1); // Fullscreen, thick glass
+                start_elev = Vector3::new(8.0, 0.0, 0.0);      // High focus
+            },
+            WindowType::DesktopSurface => {
+                dimensions = Vector3::new(1920.0, 1080.0, 0.0); 
+                start_elev = Vector3::new(0.0, 0.0, 0.0);      // Floor
+            },
+            WindowType::ContextOrb => {
+                 dimensions = Vector3::new(100.0, 100.0, 0.1); // Small sphere/orb
+                 start_pos = Vector3::new(0.0, -400.0, 0.0);   // Bottom center
+                 start_elev = Vector3::new(2.0, 0.0, 0.0);
+            },
+            _ => {}
+        }
 
         Self {
             id,
             title,
+            window_type: w_type,
             position_anim: AnimationState::new(start_pos),
             elevation_anim: AnimationState::new(start_elev),
             rotation: Quaternion::new(1.0, 0.0, 0.0, 0.0),
             
             mass_kg: 0.5,   // Standard window weight
-            dimensions: Vector3::new(800.0, 600.0, 0.05), // 5cm thick virtual glass
+            dimensions,
             material: MaterialProperties {
                 refraction_index: 1.52,
                 density: 1.0,

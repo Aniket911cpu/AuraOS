@@ -1,5 +1,5 @@
 // core/window_manager.rs
-use crate::window::Window;
+use crate::window::{Window, WindowType};
 use crate::animator::AnimationState;
 use cgmath::Vector3;
 use std::collections::HashMap;
@@ -19,11 +19,11 @@ impl WindowManager {
         }
     }
 
-    pub fn spawn_window(&mut self, title: String) -> u64 {
+    pub fn spawn_window(&mut self, title: String, w_type: WindowType) -> u64 {
         let id = self.next_id;
         self.next_id += 1;
 
-        let mut win = Window::new(id, title);
+        let mut win = Window::new(id, title, w_type);
         
         // Initialize windows at the center (0,0) but slightly "off screen" in Z for entry anim?
         // For now, just spawn at 0,0,0
