@@ -1,0 +1,1 @@
+C:\Users\anike\OneDrive\Desktop\PROJECTS\AuraOS\core\target\debug\aura_os_core.exe: C:\Users\anike\OneDrive\Desktop\PROJECTS\AuraOS\core\src\animator.rs C:\Users\anike\OneDrive\Desktop\PROJECTS\AuraOS\core\src\main.rs C:\Users\anike\OneDrive\Desktop\PROJECTS\AuraOS\core\src\window.rs C:\Users\anike\OneDrive\Desktop\PROJECTS\AuraOS\core\src\window_manager.rs

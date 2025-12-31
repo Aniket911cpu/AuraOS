@@ -1,8 +1,9 @@
 // core/window.rs
 // Part of the "Liquid Glass" UI System
 
-use cgmath::{Vector3, Quaternion};
+use cgmath::{Vector3, Quaternion, InnerSpace};
 use std::time::Instant;
+use crate::animator::AnimationState;
 
 /// Represents the physical material properties of a UI Window.
 /// This defines how the window interacts with light and force.
@@ -21,18 +22,16 @@ pub struct MaterialProperties {
 
 /// The fundamental UI unit in Aura OS.
 /// Not just a rect, but a physical object in 3D space.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Window {
     pub id: u64,
     pub title: String,
     
-    // Spatial State
-    pub position: Vector3<f32>,
-    pub rotation: Quaternion<f32>,
-    pub velocity: Vector3<f32>,
+    // Spatial State (Physics Driven)
+    pub position_anim: AnimationState,
+    pub elevation_anim: AnimationState, 
     
-    // The "Infinite Z-Axis" elevation (0.0 is 'floor', 10.0 is 'active focus')
-    pub elevation: f32,
+    pub rotation: Quaternion<f32>,
     
     // Physical attributes
     pub mass_kg: f32,
@@ -46,13 +45,20 @@ pub struct Window {
 
 impl Window {
     pub fn new(id: u64, title: String) -> Self {
+        // Default start at 0,0,0
+        let start_pos = Vector3::new(0.0, 0.0, 0.0);
+        
+        // Z-Elevation is handled separately because it's a scalar often intertwined with blur
+        // We use a Vector3 for uniformity in AnimationState but really only care about X (value)
+        let start_elev = Vector3::new(1.0, 0.0, 0.0);
+
         Self {
             id,
             title,
-            position: Vector3::new(0.0, 0.0, 0.0),
+            position_anim: AnimationState::new(start_pos),
+            elevation_anim: AnimationState::new(start_elev),
             rotation: Quaternion::new(1.0, 0.0, 0.0, 0.0),
-            velocity: Vector3::new(0.0, 0.0, 0.0),
-            elevation: 1.0, // Default floating height
+            
             mass_kg: 0.5,   // Standard window weight
             dimensions: Vector3::new(800.0, 600.0, 0.05), // 5cm thick virtual glass
             material: MaterialProperties {
@@ -65,21 +71,29 @@ impl Window {
         }
     }
 
+    pub fn set_elevation(&mut self, target_z: f32) {
+        // We store scalar elevation in the X component of the vector for the animator
+        self.elevation_anim.set_target(Vector3::new(target_z, 0.0, 0.0));
+    }
+
+    pub fn move_to(&mut self, target: Vector3<f32>) {
+        self.position_anim.set_target(target);
+    }
+
+    pub fn update_physics(&mut self) {
+        self.position_anim.step();
+        self.elevation_anim.step();
+    }
+
     /// Calculate the blurring radius required for the background
     /// based on the window's Z-elevation and thickness.
     pub fn calculate_blur_radius(&self) -> f32 {
         // Higher elevation = further from background = more blur
         // Thicker glass = more internal scattering
-        let base_blur = self.elevation * 2.5;
+        let elev = self.elevation_anim.current.x;
+        let base_blur = elev * 2.5;
         let thickness_factor = self.dimensions.z * 10.0;
         
         base_blur + thickness_factor
-    }
-
-    /// Apply a force vector to the window (e.g. from a user "throw" gesture).
-    /// F = ma -> a = F/m
-    pub fn apply_force(&mut self, force: Vector3<f32>, delta_time: f32) {
-        let acceleration = force / self.mass_kg;
-        self.velocity += acceleration * delta_time;
     }
 }

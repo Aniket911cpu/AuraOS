@@ -1,6 +1,6 @@
 // core/animator.rs
 use std::time::Instant;
-use cgmath::Vector3;
+use cgmath::{Vector3, InnerSpace};
 
 /// Represents a value being animated with spring physics.
 #[derive(Debug, Clone, Copy)]
